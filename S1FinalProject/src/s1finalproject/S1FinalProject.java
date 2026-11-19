@@ -62,26 +62,57 @@ class WordleGame {
     // Constructor: creates a new Wordle game
     // takes a parameter of the answer word and sets number of guesses to 0
     public WordleGame(String answerP) {
-        answer = answerP;
+        answer = answerP.toUpperCase();
         numGuesses = 0;
     }
     
     // Evaluate Guess: compares User's inputted word to the answer word
     // increments number of guesses
     // appropriately colors letters, appends colored word to list of previous guesses
-    public void EvaluateGuess(String inputWord) {
+    public void EvaluateGuess(String guessP) {
         // increment number of guesses
         numGuesses++;
-        
-        // 
+        // create new String to hold word as it gets colored by letter
+        String formattedGuess = "";
+        // use a for loop to check each individual letter of the User's guess
+        for (int i = 0; i < 5; i++) {
+            // temporary String variable for each iteration contains guessP's letter at the index i
+            String letter = String.valueOf(guessP.charAt(i));
+            if (letter.equals(String.valueOf((answer.charAt(i))))) {
+                formattedGuess += (GREEN + letter);
+            } else if ((answer.indexOf(letter)) != -1) {
+                formattedGuess += (YELLOW + letter);
+            } else {
+                formattedGuess += (GRAY + letter);
+            }
+        }
+        // add RESET color to avoid color bleeding
+        formattedGuess += RESET;
+        // append formattedGuess to the end of guesses list
+        guesses.add(formattedGuess);
     }
     
     // Display Round: print each item in previous guesses list on a new line, formatted
+    public void DisplayRound() {
+        // use for loop to print each index
+        for (int i = 0; i < guesses.size(); i++) {
+            System.out.println(guesses.get(i));
+        }
+    }
     
     // Is Game Over: if guesses = 6 OR the last guess = the answer word, end the game
+    public boolean isGameOver(String lastGuess) {
+        return (lastGuess.equals(answer)) || (numGuesses == 6);
+    }
     
     // Accessor: returns answer word
+    public String answerIs() {
+        return answer;
+    }
     
     // Accessor: returns number of guesses in the round
+    public int numberOfGuesses() {
+        return numGuesses;
+    }
     
 }
