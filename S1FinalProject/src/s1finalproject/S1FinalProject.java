@@ -19,6 +19,17 @@ public class S1FinalProject {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        
+        // instantiate Scanner and WordBank objects necessary to run the game
+        Scanner scan = new Scanner(System.in);
+        WordBank wordBank = new WordBank();
+        
+        // declare cross-game variables
+        int totalGames = 0;
+        ArrayList<Integer> winsCount = new ArrayList<>(6);
+        
+        // welcome user to the game, give instructions
+        System.out.println("WELCOME\nINSTRUCTIONS");
     }
     
 }
