@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
-package s1finalproject;
+package S1FinalProject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -23,20 +23,129 @@ public class S1FinalProject {
         // instantiate Scanner and WordBank objects necessary to run the game
         Scanner scan = new Scanner(System.in);
         WordBank wordBank = new WordBank();
-        
         // declare cross-game variables
         int totalGames = 0;
-        ArrayList<Integer> winsCount = new ArrayList<>(6);
+        ArrayList<Integer> winsCount = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            winsCount.add(0);
+        }
+        // declare boolean value to keep playing the game
+        boolean keepPlaying = true;
+        
         
         // welcome user to the game, give instructions
-        System.out.println("WELCOME\nINSTRUCTIONS");
+        System.out.println("=========================================");
+        System.out.println("           WELCOME TO WORDLE!            ");
+        System.out.println("=========================================");
+        System.out.println("HOW TO PLAY:");
+        System.out.println("- Guess the secret word in 6 tries or less.");
+        System.out.println("- Each guess must be a 5-letter word.");
+        System.out.println("- After each guess, the color of the letters will change:");
+        System.out.println("  " + WordleGame.GREEN + "GREEN" + WordleGame.RESET + "  = Letter is in the word AND in the correct spot.");
+        System.out.println("  " + WordleGame.YELLOW + "YELLOW" + WordleGame.RESET + " = Letter is in the word, but in the wrong spot.");
+        System.out.println("  " + WordleGame.GRAY + "GRAY" + WordleGame.RESET + "   = Letter is not in the word at all.");
+        System.out.println("=========================================\n");
+        
+        
+        // run a while loop to run the program while keepPlaying = true
+        while (keepPlaying) {
+            // instantiate a new WordleGame object with a random answer word
+            WordleGame round = new WordleGame(wordBank.answerSelect());
+            // declare variable to store user's guess
+            String userGuess = "";
+            
+            // run inner while loop while the round is not over
+            while (round.isGameOver() == false) {
+                // declare boolean to check if input is valid
+                boolean validInput = false;
+                
+                // ask for Guess #(guess count + 1) and validate input
+                while (validInput == false) {
+                    System.out.print("Enter Guess #" + (round.getGuessCount() + 1) + ": ");
+                    userGuess = scan.nextLine().trim().toUpperCase();
+                    
+                    // check if guess has 5 characters
+                    if (userGuess.length() != 5) {
+                        System.out.println("Invalid input! Please enter exactly 5 letters.");
+                    } else {
+                        // check if all 5 characters are letters
+                        boolean allLetters = true;
+                        for (int i = 0; i < 5; i++) {
+                            if (Character.isLetter(userGuess.charAt(i)) == false) {
+                                allLetters = false;
+                            }
+                        }
+                        
+                        // if all characters are letters, input is valid
+                        if (allLetters == true) {
+                            validInput = true;
+                        } else {
+                            System.out.println("Invalid input! Please only use letters (no numbers or symbols).");
+                        }
+                    }
+                }
+                
+                // evaluate guess and display the round
+                round.evaluateGuess(userGuess);
+                System.out.println();
+                round.displayRound();
+                System.out.println();
+            }
+            
+            // increment total games played
+            totalGames++;
+            
+            // check if user guessed the word or ran out of tries
+            if (userGuess.equals(round.getAnswer())) {
+                System.out.println("Congratulations! You guessed the word in " + round.getGuessCount() + " tries!");
+                // increment winsCount object at index (number of guesses - 1)
+                int winIndex = round.getGuessCount() - 1;
+                winsCount.set(winIndex, winsCount.get(winIndex) + 1);
+            } else {
+                // tell them the secret word
+                System.out.println("Game over! You ran out of guesses.");
+                System.out.println("The secret word was: " + round.getAnswer());
+            }
+            
+            // print emoji bar chart of won games by number of guesses to win
+            System.out.println("\n--- FINAL STATS (Total Games: " + totalGames + ") ---");
+            for (int i = 0; i < winsCount.size(); i++) {
+                System.out.print((i + 1) + ": ");
+                // print one green square emoji for each win at this guess count
+                for (int j = 0; j < winsCount.get(i); j++) {
+                    System.out.print("🟩");
+                }
+                // print the number count at the end of the bar
+                System.out.println(" (" + winsCount.get(i) + ")");
+            }
+            System.out.println("---------------------------------------------\n");
+            
+            // ask if they want to keep playing and validate response
+            boolean validReplay = false;
+            while (validReplay == false) {
+                System.out.print("Would you like to play again? (Y/N): ");
+                String playAgain = scan.nextLine().trim().toUpperCase();
+                if (playAgain.equals("Y")) {
+                    keepPlaying = true;
+                    validReplay = true;
+                    System.out.println("\nStarting a new game...\n");
+                } else if (playAgain.equals("N")) {
+                    keepPlaying = false;
+                    validReplay = true;
+                    System.out.println("\nThanks for playing Wordle! Goodbye!");
+                } else {
+                    System.out.println("Invalid input! Please enter Y or N.");
+                }
+            }
+        }
     }
     
 }
 
+
 // WordBank class describes the state and behavior of WordBank objects
 class WordBank {
-    // create new Scanner object
+    // create new Random object
     Random r1 = new Random();
     // instantiate new empty word list
     static List<String> words = List.of("ACORN", "AGATE", "AMBER", "ANVIL", "ATLAS", "BADGE", "BENCH", "BISON", "BLAST", "BLAZE", 
@@ -48,17 +157,20 @@ class WordBank {
             "TIGER", "TOPAZ", "ULTRA", "UNITY", "URBAN", "VAPOR", "VAULT", "VENUE", "VIPER", "VIVID", "WALTZ", "WHALE", "WIDOW", "WRECK", 
             "YACHT", "YEAST", "ZEBRA", "ZESTY");
     
+    
     // Random Word Selector: selects and returns an item in the list at a randomly generated index
     public String answerSelect() {
-        return words.get(r1.nextInt(0, (words.size() - 1)));
+        return words.get(r1.nextInt(0, words.size()));
     }
 }
 
+
 class WordleGame {
     // instantiate variables and constants
-    // guess numbers
+    // guess numbers, game status
     static final int MAX_GUESSES = 6;
     int numGuesses;
+    boolean gameOver;
     // ANSI color strings
     static final String GREEN = "\u001B[32m";
     static final String YELLOW = "\u001B[33m";
@@ -75,12 +187,14 @@ class WordleGame {
     public WordleGame(String answerP) {
         answer = answerP.toUpperCase();
         numGuesses = 0;
+        gameOver = false;
     }
+    
     
     // Evaluate Guess: compares User's inputted word to the answer word
     // increments number of guesses
     // appropriately colors letters, appends colored word to list of previous guesses
-    public void EvaluateGuess(String guessP) {
+    public void evaluateGuess(String guessP) {
         // increment number of guesses
         numGuesses++;
         // create new String to hold word as it gets colored by letter
@@ -101,28 +215,34 @@ class WordleGame {
         formattedGuess += RESET;
         // append formattedGuess to the end of guesses list
         guesses.add(formattedGuess);
+        // update gameOver
+        gameOver = guessP.equals(answer) || (numGuesses == 6);
     }
     
+    
     // Display Round: print each item in previous guesses list on a new line, formatted
-    public void DisplayRound() {
+    public void displayRound() {
         // use for loop to print each index
         for (int i = 0; i < guesses.size(); i++) {
             System.out.println(guesses.get(i));
         }
     }
     
+    
     // Is Game Over: if guesses = 6 OR the last guess = the answer word, end the game
-    public boolean isGameOver(String lastGuess) {
-        return (lastGuess.equals(answer)) || (numGuesses == 6);
+    public boolean isGameOver() {
+        return gameOver;
     }
     
+    
     // Accessor: returns answer word
-    public String answerIs() {
+    public String getAnswer() {
         return answer;
     }
     
+    
     // Accessor: returns number of guesses in the round
-    public int numberOfGuesses() {
+    public int getGuessCount() {
         return numGuesses;
     }
     
